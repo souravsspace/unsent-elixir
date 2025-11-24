@@ -30,12 +30,16 @@ defmodule Unsent.Client do
   @doc """
   Performs an HTTP request.
   """
-  def request(client, method, path, body \\ nil) do
+  def request(client, method, path, body \\ nil, opts \\ []) do
     url = "#{client.base_url}#{path}"
-    headers = [
+    
+    default_headers = [
       {"Authorization", "Bearer #{client.api_key}"},
       {"Content-Type", "application/json"}
     ]
+    
+    custom_headers = Keyword.get(opts, :headers, [])
+    headers = default_headers ++ custom_headers
 
     request_body = if body, do: Jason.encode!(body), else: ""
 
@@ -81,9 +85,9 @@ defmodule Unsent.Client do
     end
   end
 
-  def post(client, path, body), do: request(client, :post, path, body)
-  def get(client, path), do: request(client, :get, path)
-  def put(client, path, body), do: request(client, :put, path, body)
-  def patch(client, path, body), do: request(client, :patch, path, body)
-  def delete(client, path), do: request(client, :delete, path)
+  def post(client, path, body, opts \\ []), do: request(client, :post, path, body, opts)
+  def get(client, path, opts \\ []), do: request(client, :get, path, nil, opts)
+  def put(client, path, body, opts \\ []), do: request(client, :put, path, body, opts)
+  def patch(client, path, body, opts \\ []), do: request(client, :patch, path, body, opts)
+  def delete(client, path, opts \\ []), do: request(client, :delete, path, nil, opts)
 end
