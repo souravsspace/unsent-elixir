@@ -25,7 +25,7 @@ end
 ### Basic Setup
 
 ```elixir
-client = Unsent.new("us_12345")
+client = Unsent.new("un_xxxx")
 ```
 
 ### Environment Variables

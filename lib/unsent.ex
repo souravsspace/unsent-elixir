@@ -12,7 +12,7 @@ defmodule Unsent do
 
   ## Examples
 
-      iex> client = Unsent.new("us_xxx")
+      iex> client = Unsent.new("un_xxx")
       %Unsent.Client{...}
 
   """
