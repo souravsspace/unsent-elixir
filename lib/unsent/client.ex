@@ -32,18 +32,19 @@ defmodule Unsent.Client do
   """
   def request(client, method, path, body \\ nil, opts \\ []) do
     url = "#{client.base_url}#{path}"
-    
+
     default_headers = [
       {"Authorization", "Bearer #{client.api_key}"},
       {"Content-Type", "application/json"}
     ]
-    
+
     custom_headers = Keyword.get(opts, :headers, [])
     headers = default_headers ++ custom_headers
 
     request_body = if body, do: Jason.encode!(body), else: ""
+    http_opts = Keyword.delete(opts, :headers)
 
-    case HTTPoison.request(method, url, request_body, headers) do
+    case HTTPoison.request(method, url, request_body, headers, http_opts) do
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}}
       when status_code >= 200 and status_code < 300 ->
         case Jason.decode(response_body) do
