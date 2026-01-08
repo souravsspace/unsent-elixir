@@ -5,6 +5,17 @@ defmodule Unsent.Campaigns do
 
   alias Unsent.Client
 
+  @doc """
+  Retrieve all campaigns.
+
+  ## Examples
+
+      {:ok, campaigns} = Unsent.Campaigns.list(client)
+  """
+  def list(client) do
+    Client.get(client, "/campaigns")
+  end
+
   def create(client, payload) do
     Client.post(client, "/campaigns", payload)
   end

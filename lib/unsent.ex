@@ -13,7 +13,8 @@ defmodule Unsent do
   ## Examples
 
       iex> client = Unsent.new("un_xxx")
-      %Unsent.Client{...}
+      iex> is_struct(client, Unsent.Client)
+      true
 
   """
   def new(api_key, opts \\ []) do

@@ -1,12 +1,6 @@
 # Unsent Elixir SDK
 
-Official Elixir SDK for the [Unsent API](https://unsent.dev) - Send transactional emails with ease.
-
-## Prerequisites
-
-- [Unsent API key](https://app.unsent.dev/dev-settings/api-keys)
-- [Verified domain](https://app.unsent.dev/domains)
-- Elixir 1.14 or higher
+Official Elixir SDK for the [Unsent API](https://unsent.dev) - Send transactional emails,manage contacts, campaigns, and domains.
 
 ## Installation
 
@@ -15,58 +9,79 @@ Add `unsent` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:unsent, "~> 1.0.1"}
+    {:unsent, "~> 1.0.2"}
   ]
 end
 ```
 
-## Usage
-
-### Basic Setup
+## Quickstart
 
 ```elixir
-client = Unsent.new("un_xxxx")
-```
+# Initialize client
+client = Unsent.new("un_your_api_key")
 
-### Environment Variables
-
-You can also set your API key using environment variables:
-
-```elixir
-# Set UNSENT_API_KEY in your environment
-# Then initialize without passing the key
+# Or use environment variable UNSENT_API_KEY
 client = Unsent.new()
-```
 
-### Sending Emails
-
-#### Simple Email
-
-```elixir
-{:ok, data} = Unsent.Emails.send(client, %{
-  to: "hello@acme.com",
-  from: "hello@company.com",
-  subject: "Unsent email",
-  html: "<p>Unsent is the best email service provider to send emails</p>",
-  text: "Unsent is the best email service provider to send emails"
+# Send an email
+{:ok, email} = Unsent.Emails.send(client, %{
+  to: "user@example.com",
+  from: "hello@yourdomain.com",
+  subject: "Welcome!",
+  html: "<p>Welcome to our service!</p>"
 })
-
-IO.inspect(data, label: "Email sent")
 ```
 
-#### Email with Attachments
+## Features
+
+- ✅ Send single and batch emails
+- ✅ Manage contacts and contact books
+- ✅ Create and schedule campaigns
+- ✅ Track analytics and reputation
+- ✅ Manage domains and verification
+- ✅ Handle suppressions and templates
+- ✅ Built-in error handling
+- ✅ Idempotency support
+
+## API Documentation
+
+### Client Initialization
 
 ```elixir
-{:ok, data} = Unsent.Emails.send(client, %{
-  to: "hello@acme.com",
+# With API key
+client = Unsent.new("un_xxx")
+
+# With options
+client = Unsent.new("un_xxx", 
+  base_url: "https://api.unsent.dev/v1", 
+  raise_on_error: false
+)
+```
+
+### Emails
+
+#### Send Email
+
+```elixir
+{:ok, email} = Unsent.Emails.send(client, %{
+  to: "user@example.com",
   from: "hello@company.com",
-  subject: "Email with attachment",
-  html: "<p>Please find the attachment below</p>",
+  subject: "Hello",
+  html: "<p>Email content</p>",
+  text: "Email content"
+})
+```
+
+#### With Attachments
+
+```elixir
+Unsent.Emails.send(client, %{
+  to: "user@example.com",
+  from: "hello@company.com",
+  subject: "Document",
+  html: "<p>See attachment</p>",
   attachments: [
-    %{
-      filename: "document.pdf",
-      content: "base64-encoded-content-here"
-    }
+    %{filename: "doc.pdf", content: "base64-content"}
   ]
 })
 ```
@@ -74,238 +89,341 @@ IO.inspect(data, label: "Email sent")
 #### Scheduled Email
 
 ```elixir
-scheduled_time = DateTime.utc_now() |> DateTime.add(1, :hour)
+scheduled_time = DateTime.utc_now() |> DateTime.add(3600, :second)
 
-{:ok, data} = Unsent.Emails.send(client, %{
-  to: "hello@acme.com",
+Unsent.Emails.send(client, %{
+  to: "user@example.com",
   from: "hello@company.com",
-  subject: "Scheduled email",
-  html: "<p>This email was scheduled</p>",
-  scheduledAt: scheduled_time
+  subject: "Scheduled",
+  html: "<p>Sent later</p>",
+  scheduledAt: DateTime.to_iso8601(scheduled_time)
 })
 ```
 
-#### Batch Emails
+#### Batch Send (up to 100 emails)
 
 ```elixir
 emails = [
-  %{
-    to: "user1@example.com",
-    from: "hello@company.com",
-    subject: "Hello User 1",
-    html: "<p>Welcome User 1</p>"
-  },
-  %{
-    to: "user2@example.com",
-    from: "hello@company.com",
-    subject: "Hello User 2",
-    html: "<p>Welcome User 2</p>"
-  }
+  %{to: "user1@example.com", from: "hello@company.com", subject: "Hi 1", html: "<p>1</p>"},
+  %{to: "user2@example.com", from: "hello@company.com", subject: "Hi 2", html: "<p>2</p>"}
 ]
 
-{:ok, data} = Unsent.Emails.batch(client, emails)
-IO.puts("Sent #{length(data["data"])} emails")
+{:ok, result} = Unsent.Emails.batch(client, emails)
 ```
 
-#### Idempotent Retries
+#### Idempotent Send
 
 ```elixir
-# Idempotent retries: same payload + same key returns the original response
-payload = %{
-  to: "hello@acme.com",
-  from: "hello@company.com",
-  subject: "Welcome!",
-  html: "<p>Welcome to our service</p>"
-}
-
-{:ok, data} = Unsent.Emails.send(
-  client,
-  payload,
-  headers: [{"Idempotency-Key", "signup-123"}]
+Unsent.Emails.send(client, payload, 
+  headers: [{"Idempotency-Key", "unique-key-123"}]
 )
-
-# Works for batch requests as well
-batch_payload = [
-  # ... items
-]
-
-{:ok, data} = Unsent.Emails.batch(
-  client,
-  batch_payload,
-  headers: [{"Idempotency-Key", "bulk-welcome-1"}]
-)
-
-# If the same key is reused with a different payload, the API responds with HTTP 409.
 ```
 
-### Managing Emails
+#### List Emails
 
-#### Get Email Details
+```elixir
+# List all
+{:ok, emails} = Unsent.Emails.list(client)
+
+# With filters
+Unsent.Emails.list(client, 
+  page: 1, 
+  limit: 50,
+  startDate: "2024-01-01T00:00:00Z",
+  endDate: "2024-12-31T23:59:59Z",
+  domainId: "domain_123"
+)
+
+# Filter by multiple domains
+Unsent.Emails.list(client, domainId: ["domain_1", "domain_2"])
+```
+
+#### Get Email
 
 ```elixir
 {:ok, email} = Unsent.Emails.get(client, "email_id")
-IO.puts("Email status: #{email["status"]}")
 ```
 
 #### Update Email
 
 ```elixir
-{:ok, data} = Unsent.Emails.update(client, "email_id", %{
-  subject: "Updated subject",
-  html: "<p>Updated content</p>"
+Unsent.Emails.update(client, "email_id", %{
+  scheduledAt: "2024-12-01T10:00:00Z"
 })
 ```
 
 #### Cancel Scheduled Email
 
 ```elixir
-{:ok, _} = Unsent.Emails.cancel(client, "email_id")
-IO.puts("Email cancelled successfully")
+Unsent.Emails.cancel(client, "email_id")
 ```
 
-### Managing Contacts
-
-#### Create Contact
+#### Get Email Events
 
 ```elixir
-{:ok, contact} = Unsent.Contacts.create(client, "contact_book_id", %{
+# Bounces
+{:ok, bounces} = Unsent.Emails.get_bounces(client, page: 1, limit: 20)
+
+# Complaints
+{:ok, complaints} = Unsent.Emails.get_complaints(client)
+
+# Unsubscribes
+{:ok, unsubscribes} = Unsent.Emails.get_unsubscribes(client)
+```
+
+### Contact Books
+
+```elixir
+# List all contact books
+{:ok, books} = Unsent.ContactBooks.list(client)
+
+# Create contact book
+{:ok, book} = Unsent.ContactBooks.create(client, %{
+  name: "Newsletter Subscribers"
+})
+
+# Get contact book
+{:ok, book} = Unsent.ContactBooks.get(client, "book_id")
+
+# Update contact book
+Unsent.ContactBooks.update(client, "book_id", %{name: "Updated Name"})
+
+# Delete contact book
+Unsent.ContactBooks.delete(client, "book_id")
+```
+
+### Contacts
+
+```elixir
+# List contacts in a book
+{:ok, contacts} = Unsent.Contacts.list(client, "book_id")
+
+# With filters
+Unsent.Contacts.list(client, "book_id",
+  page: 1,
+  limit: 50,
+  emails: "user1@example.com,user2@example.com",
+  ids: "contact_1,contact_2"
+)
+
+# Create contact
+{:ok, contact} = Unsent.Contacts.create(client, "book_id", %{
   email: "user@example.com",
   firstName: "John",
   lastName: "Doe",
-  metadata: %{
-    company: "Acme Inc",
-    role: "Developer"
-  }
+  data: %{plan: "premium"}
 })
-```
 
-#### Get Contact
+# Get contact
+{:ok, contact} = Unsent.Contacts.get(client, "book_id", "contact_id")
 
-```elixir
-{:ok, contact} = Unsent.Contacts.get(client, "contact_book_id", "contact_id")
-```
-
-#### Update Contact
-
-```elixir
-{:ok, contact} = Unsent.Contacts.update(client, "contact_book_id", "contact_id", %{
-  firstName: "Jane",
-  metadata: %{
-    role: "Senior Developer"
-  }
+# Update contact
+Unsent.Contacts.update(client, "book_id", "contact_id", %{
+  firstName: "Jane"
 })
-```
 
-#### Upsert Contact
-
-```elixir
-# Creates if doesn't exist, updates if exists
-{:ok, contact} = Unsent.Contacts.upsert(client, "contact_book_id", "contact_id", %{
+# Upsert contact (create or update)
+Unsent.Contacts.upsert(client, "book_id", "contact_id", %{
   email: "user@example.com",
-  firstName: "John",
-  lastName: "Doe"
+  firstName: "John"
 })
+
+# Delete contact
+Unsent.Contacts.delete(client, "book_id", "contact_id")
 ```
 
-#### Delete Contact
+### Campaigns
 
 ```elixir
-{:ok, _} = Unsent.Contacts.delete(client, "contact_book_id", "contact_id")
-```
+# List campaigns
+{:ok, campaigns} = Unsent.Campaigns.list(client)
 
-### Managing Campaigns
-
-#### Create Campaign
-
-```elixir
+# Create campaign
 {:ok, campaign} = Unsent.Campaigns.create(client, %{
   name: "Welcome Series",
-  subject: "Welcome to our service!",
-  html: "<p>Thanks for joining us!</p>",
-  from: "welcome@example.com",
-  contactBookId: "cb_1234567890"
+  subject: "Welcome to {{company}}!",
+  html: "<p>Hi {{firstName}}</p>",
+  from: "hello@company.com",
+  contactBookId: "book_id"
 })
 
-IO.puts("Campaign created! ID: #{campaign["id"]}")
-```
+# Get campaign
+{:ok, campaign} = Unsent.Campaigns.get(client, "campaign_id")
 
-#### Schedule Campaign
-
-```elixir
-{:ok, _} = Unsent.Campaigns.schedule(client, campaign["id"], %{
+# Schedule campaign
+Unsent.Campaigns.schedule(client, "campaign_id", %{
   scheduledAt: "2024-12-01T10:00:00Z"
 })
+
+# Pause campaign
+Unsent.Campaigns.pause(client, "campaign_id")
+
+# Resume campaign
+Unsent.Campaigns.resume(client, "campaign_id")
 ```
 
-#### Pause/Resume Campaigns
+### Domains
 
 ```elixir
-# Pause a campaign
-{:ok, _} = Unsent.Campaigns.pause(client, "campaign_123")
-
-# Resume a campaign
-{:ok, _} = Unsent.Campaigns.resume(client, "campaign_123")
-```
-
-#### Get Campaign Details
-
-```elixir
-{:ok, campaign} = Unsent.Campaigns.get(client, "campaign_id")
-IO.puts("Campaign status: #{campaign["status"]}")
-```
-
-### Managing Domains
-
-#### List Domains
-
-```elixir
+# List domains
 {:ok, domains} = Unsent.Domains.list(client)
-Enum.each(domains, fn domain ->
-  IO.puts("Domain: #{domain["domain"]}, Status: #{domain["status"]}")
-end)
-```
 
-#### Create Domain
-
-```elixir
+# Create domain
 {:ok, domain} = Unsent.Domains.create(client, %{
-  domain: "example.com"
+  name: "yourdomain.com",
+  region: "us-east-1"
 })
+
+# Verify domain
+Unsent.Domains.verify(client, "domain_id")
+
+# Get domain
+{:ok, domain} = Unsent.Domains.get(client, "domain_id")
+
+# Delete domain
+Unsent.Domains.delete(client, "domain_id")
 ```
 
-#### Verify Domain
+### Templates
 
 ```elixir
-{:ok, result} = Unsent.Domains.verify(client, 123)
-IO.puts("Verification status: #{result["status"]}")
+# List templates
+{:ok, templates} = Unsent.Templates.list(client)
+
+# Create template
+{:ok, template} = Unsent.Templates.create(client, %{
+  name: "Welcome Email",
+  subject: "Welcome {{name}}!",
+  html: "<h1>Hi {{name}}</h1><p>Welcome to {{company}}</p>"
+})
+
+# Get template
+{:ok, template} = Unsent.Templates.get(client, "template_id")
+
+# Update template
+Unsent.Templates.update(client, "template_id", %{
+  subject: "Updated: Welcome {{name}}!"
+})
+
+# Delete template
+Unsent.Templates.delete(client, "template_id")
 ```
 
-#### Get Domain
+### Suppressions
 
 ```elixir
-{:ok, domain} = Unsent.Domains.get(client, 123)
+# List all suppressions
+{:ok, suppressions} = Unsent.Suppressions.list(client)
+
+# With filters
+Unsent.Suppressions.list(client,
+  page: 1,
+  limit: 50,
+  search: "example.com",
+  reason: "HARD_BOUNCE" # or "COMPLAINT", "MANUAL", "UNSUBSCRIBE"
+)
+
+# Add to suppression list
+Unsent.Suppressions.add(client, %{
+  email: "blocked@example.com",
+  reason: "MANUAL"
+})
+
+# Remove from suppression list
+Unsent.Suppressions.delete(client, "blocked@example.com")
+```
+
+### Analytics
+
+```elixir
+# Get overall analytics
+{:ok, analytics} = Unsent.Analytics.get(client)
+
+# Get time series data
+Unsent.Analytics.get_time_series(client, days: 30)
+Unsent.Analytics.get_time_series(client, days: 7, domain: "yourdomain.com")
+
+# Get reputation score
+Unsent.Analytics.get_reputation(client)
+Unsent.Analytics.get_reputation(client, domain: "yourdomain.com")
+```
+
+### Settings
+
+```elixir
+# Get team settings
+{:ok, settings} = Unsent.Settings.get(client)
+```
+
+### API Keys
+
+```elixir
+# List API keys
+{:ok, keys} = Unsent.ApiKeys.list(client)
+
+# Create API key
+{:ok, key} = Unsent.ApiKeys.create(client, %{
+  name: "Production Key",
+  permission: "FULL" # or "SENDING"
+})
+
+# Delete API key
+Unsent.ApiKeys.delete(client, "key_id")
+```
+
+### Webhooks (Future Feature)
+
+> **Note**: Webhooks are currently in development and not fully implemented on the server side yet.
+
+```elixir
+# Placeholder methods available
+Unsent.Webhooks.list(client)
+Unsent.Webhooks.create(client, %{url: "https://...", events: [...]})
+Unsent.Webhooks.update(client, "webhook_id", %{events: [...]})
+Unsent.Webhooks.delete(client, "webhook_id")
 ```
 
 ## Error Handling
 
-The SDK returns `{:ok, data}` on success and `{:error, error}` on failure.
+By default, the SDK raises exceptions on errors:
 
 ```elixir
-case Unsent.Emails.send(client, payload) do
-  {:ok, data} ->
-    IO.puts("Success: #{data["id"]}")
-  {:error, error} ->
-    IO.puts("Error: #{error.message}")
+try do
+  Unsent.Emails.send(client, invalid_payload)
+rescue
+  e in Unsent.HTTPError ->
+    IO.puts("Error: #{e.error["message"]}")
+    IO.puts("Status: #{e.status_code}")
 end
 ```
+
+Return tuples instead of raising:
+
+```elixir
+client = Unsent.new("un_xxx", raise_on_error: false)
+
+case Unsent.Emails.send(client, payload) do
+  {:ok, email} -> IO.puts("Success!")
+  {:error, error} -> IO.puts("Failed: #{error["message"]}")
+end
+```
+
+## Testing
+
+Integration tests are available in `examples/elixir-example`:
+
+```bash
+cd examples/elixir-example
+source .env.local && mix test test/integration_test.exs
+```
+
+## Resources
+
+- [Documentation](https://docs.unsent.dev)
+- [API Reference](https://docs.unsent.dev/api-reference)
+- [Dashboard](https://app.unsent.dev)
+- [GitHub](https://github.com/unsentdev/elixir-sdk)
 
 ## License
 
 MIT
-
-## Support
-
-- [Documentation](https://docs.unsent.dev)
-- [GitHub Issues](https://github.com/souravsspace/unsent-elixir/issues)
-- [Discord Community](https://discord.gg/unsent)
-
