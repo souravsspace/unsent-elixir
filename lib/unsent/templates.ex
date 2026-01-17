@@ -4,6 +4,7 @@ defmodule Unsent.Templates do
   """
 
   alias Unsent.Client
+  alias Unsent.Types
 
   @doc """
   Retrieve all email templates.
@@ -12,6 +13,7 @@ defmodule Unsent.Templates do
 
       {:ok, templates} = Unsent.Templates.list(client)
   """
+  @spec list(Client.t()) :: {:ok, Types.GetTemplates200Response.t()} | {:error, any()}
   def list(client) do
     Client.get(client, "/templates")
   end
@@ -31,6 +33,7 @@ defmodule Unsent.Templates do
         html: "<h1>Welcome {{name}}</h1>"
       })
   """
+  @spec create(Client.t(), Types.CreateTemplateRequest.t() | map()) :: {:ok, Types.CreateTemplate200Response.t()} | {:error, any()}
   def create(client, payload) do
     Client.post(client, "/templates", payload)
   end
@@ -42,6 +45,7 @@ defmodule Unsent.Templates do
 
       {:ok, template} = Unsent.Templates.get(client, "template_123")
   """
+  @spec get(Client.t(), String.t()) :: {:ok, map()} | {:error, any()}
   def get(client, id) do
     Client.get(client, "/templates/#{id}")
   end
@@ -60,6 +64,7 @@ defmodule Unsent.Templates do
         subject: "Updated Welcome {{name}}!"
       })
   """
+  @spec update(Client.t(), String.t(), Types.UpdateTemplateRequest.t() | map()) :: {:ok, map()} | {:error, any()}
   def update(client, id, payload) do
     Client.patch(client, "/templates/#{id}", payload)
   end
@@ -71,6 +76,7 @@ defmodule Unsent.Templates do
 
       {:ok, _} = Unsent.Templates.delete(client, "template_123")
   """
+  @spec delete(Client.t(), String.t()) :: {:ok, map()} | {:error, any()}
   def delete(client, id) do
     Client.delete(client, "/templates/#{id}")
   end

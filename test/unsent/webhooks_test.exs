@@ -23,5 +23,13 @@ defmodule Unsent.WebhooksTest do
     test "delete/2 method exists" do
       assert is_function(&Unsent.Webhooks.delete/2)
     end
+
+    test "get/2 method exists" do
+      assert is_function(&Unsent.Webhooks.get/2)
+    end
+
+    test "test/2 method exists" do
+      assert is_function(&Unsent.Webhooks.test/2)
+    end
   end
 end

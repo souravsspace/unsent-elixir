@@ -21,5 +21,13 @@ defmodule Unsent.DomainsTest do
     test "delete/2 method exists" do
       assert is_function(&Unsent.Domains.delete/2)
     end
+
+    test "get_analytics/3 method exists" do
+      assert is_function(&Unsent.Domains.get_analytics/3)
+    end
+
+    test "get_stats/3 method exists" do
+      assert is_function(&Unsent.Domains.get_stats/3)
+    end
   end
 end

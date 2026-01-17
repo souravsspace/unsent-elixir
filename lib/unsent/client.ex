@@ -7,9 +7,16 @@ defmodule Unsent.Client do
 
   defstruct [:api_key, :base_url, :raise_on_error]
 
+  @type t :: %__MODULE__{
+    api_key: String.t(),
+    base_url: String.t(),
+    raise_on_error: boolean()
+  }
+
   @doc """
   Creates a new client.
   """
+  @spec new(String.t() | nil, keyword()) :: t()
   def new(api_key \\ nil, opts \\ []) do
     api_key = api_key || System.get_env("UNSENT_API_KEY")
 
@@ -86,9 +93,18 @@ defmodule Unsent.Client do
     end
   end
 
+  @spec post(t(), String.t(), map() | list(), keyword()) :: {:ok, map() | nil} | {:error, any()}
   def post(client, path, body, opts \\ []), do: request(client, :post, path, body, opts)
+
+  @spec get(t(), String.t(), keyword()) :: {:ok, map() | nil} | {:error, any()}
   def get(client, path, opts \\ []), do: request(client, :get, path, nil, opts)
+
+  @spec put(t(), String.t(), map(), keyword()) :: {:ok, map() | nil} | {:error, any()}
   def put(client, path, body, opts \\ []), do: request(client, :put, path, body, opts)
+
+  @spec patch(t(), String.t(), map(), keyword()) :: {:ok, map() | nil} | {:error, any()}
   def patch(client, path, body, opts \\ []), do: request(client, :patch, path, body, opts)
+
+  @spec delete(t(), String.t(), keyword()) :: {:ok, map() | nil} | {:error, any()}
   def delete(client, path, opts \\ []), do: request(client, :delete, path, nil, opts)
 end

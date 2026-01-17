@@ -38,5 +38,9 @@ defmodule Unsent.EmailsTest do
     test "cancel/2 method exists" do
       assert is_function(&Unsent.Emails.cancel/2)
     end
+
+    test "get_events/3 method exists" do
+      assert is_function(&Unsent.Emails.get_events/3)
+    end
   end
 end

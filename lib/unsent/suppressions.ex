@@ -4,6 +4,7 @@ defmodule Unsent.Suppressions do
   """
 
   alias Unsent.Client
+  alias Unsent.Types
 
   @doc """
   List suppressed emails.
@@ -23,6 +24,7 @@ defmodule Unsent.Suppressions do
       {:ok, suppressions} = Unsent.Suppressions.list(client, reason: "HARD_BOUNCE")
       {:ok, suppressions} = Unsent.Suppressions.list(client, search: "example.com")
   """
+  @spec list(Client.t(), keyword()) :: {:ok, list(map())} | {:error, any()}
   def list(client, query \\ []) do
     params = build_query_params(query, [:page, :limit, :search, :reason])
     path = build_path("/suppressions", params)
@@ -43,6 +45,7 @@ defmodule Unsent.Suppressions do
         reason: "MANUAL"
       })
   """
+  @spec add(Client.t(), Types.AddSuppressionRequest.t() | map()) :: {:ok, Types.AddSuppression200Response.t()} | {:error, any()}
   def add(client, payload) do
     Client.post(client, "/suppressions", payload)
   end
@@ -58,6 +61,7 @@ defmodule Unsent.Suppressions do
 
       {:ok, _} = Unsent.Suppressions.delete(client, "user@example.com")
   """
+  @spec delete(Client.t(), String.t()) :: {:ok, map()} | {:error, any()}
   def delete(client, email) do
     Client.delete(client, "/suppressions/email/#{email}")
   end

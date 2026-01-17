@@ -4,14 +4,18 @@ defmodule Unsent.Emails do
   """
 
   alias Unsent.Client
+  alias Unsent.Types
 
+  @spec send(Client.t(), Types.SendEmailRequest.t() | map(), keyword()) :: {:ok, map()} | {:error, any()}
   def send(client, payload, opts \\ []), do: create(client, payload, opts)
 
+  @spec create(Client.t(), Types.SendEmailRequest.t() | map(), keyword()) :: {:ok, map()} | {:error, any()}
   def create(client, payload, opts \\ []) do
     payload = normalize_payload(payload)
     Client.post(client, "/emails", payload, opts)
   end
 
+  @spec batch(Client.t(), list(Types.SendEmailRequest.t() | map()), keyword()) :: {:ok, list(map())} | {:error, any()}
   def batch(client, emails, opts \\ []) do
     emails = Enum.map(emails, &normalize_payload/1)
     Client.post(client, "/emails/batch", emails, opts)
@@ -36,6 +40,7 @@ defmodule Unsent.Emails do
       {:ok, emails} = Unsent.Emails.list(client, domainId: "domain_123")
       {:ok, emails} = Unsent.Emails.list(client, domainId: ["domain_123", "domain_456"])
   """
+  @spec list(Client.t(), keyword()) :: {:ok, list(map())} | {:error, any()}
   def list(client, query \\ []) do
     params = build_list_query_params(query)
     path = build_path("/emails", params)
@@ -56,6 +61,7 @@ defmodule Unsent.Emails do
       {:ok, bounces} = Unsent.Emails.get_bounces(client)
       {:ok, bounces} = Unsent.Emails.get_bounces(client, page: 2, limit: 50)
   """
+  @spec get_bounces(Client.t(), keyword()) :: {:ok, map()} | {:error, any()}
   def get_bounces(client, query \\ []) do
     params = build_query_params(query, [:page, :limit])
     path = build_path("/emails/bounces", params)
@@ -76,6 +82,7 @@ defmodule Unsent.Emails do
       {:ok, complaints} = Unsent.Emails.get_complaints(client)
       {:ok, complaints} = Unsent.Emails.get_complaints(client, page: 2, limit: 50)
   """
+  @spec get_complaints(Client.t(), keyword()) :: {:ok, map()} | {:error, any()}
   def get_complaints(client, query \\ []) do
     params = build_query_params(query, [:page, :limit])
     path = build_path("/emails/complaints", params)
@@ -96,23 +103,49 @@ defmodule Unsent.Emails do
       {:ok, unsubscribes} = Unsent.Emails.get_unsubscribes(client)
       {:ok, unsubscribes} = Unsent.Emails.get_unsubscribes(client, page: 2, limit: 50)
   """
+  @spec get_unsubscribes(Client.t(), keyword()) :: {:ok, map()} | {:error, any()}
   def get_unsubscribes(client, query \\ []) do
     params = build_query_params(query, [:page, :limit])
     path = build_path("/emails/unsubscribes", params)
     Client.get(client, path)
   end
 
+  @spec get(Client.t(), String.t()) :: {:ok, map()} | {:error, any()}
   def get(client, email_id) do
     Client.get(client, "/emails/#{email_id}")
   end
 
+  @spec update(Client.t(), String.t(), map()) :: {:ok, map()} | {:error, any()}
   def update(client, email_id, payload) do
     # update payload might have scheduled_at, but no from
     Client.patch(client, "/emails/#{email_id}", payload)
   end
 
+  @spec cancel(Client.t(), String.t()) :: {:ok, map()} | {:error, any()}
   def cancel(client, email_id) do
     Client.post(client, "/emails/#{email_id}/cancel", %{})
+  end
+
+  @doc """
+  Get events for a specific email.
+
+  ## Parameters
+
+    * `email_id` - The ID of the email
+    * `query` - Optional query parameters:
+      * `:page` - Page number (default: 1)
+      * `:limit` - Items per page (default: 50, max: 100)
+
+  ## Examples
+
+      {:ok, events} = Unsent.Emails.get_events(client, "email_123")
+      {:ok, events} = Unsent.Emails.get_events(client, "email_123", page: 2, limit: 20)
+  """
+  @spec get_events(Client.t(), String.t(), keyword()) :: {:ok, map()} | {:error, any()}
+  def get_events(client, email_id, query \\ []) do
+    params = build_query_params(query, [:page, :limit])
+    path = build_path("/emails/#{email_id}/events", params)
+    Client.get(client, path)
   end
 
   defp normalize_payload(payload) do

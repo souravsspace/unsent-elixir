@@ -4,6 +4,7 @@ defmodule Unsent.ApiKeys do
   """
 
   alias Unsent.Client
+  alias Unsent.Types
 
   @doc """
   Retrieve a list of API keys for the current team.
@@ -12,6 +13,7 @@ defmodule Unsent.ApiKeys do
 
       {:ok, api_keys} = Unsent.ApiKeys.list(client)
   """
+  @spec list(Client.t()) :: {:ok, list(Types.GetApiKeys200ResponseInner.t())} | {:error, any()}
   def list(client) do
     Client.get(client, "/api-keys")
   end
@@ -37,6 +39,7 @@ defmodule Unsent.ApiKeys do
         permission: "SENDING"
       })
   """
+  @spec create(Client.t(), Types.CreateApiKeyRequest.t() | map()) :: {:ok, Types.CreateApiKey200Response.t()} | {:error, any()}
   def create(client, payload) do
     Client.post(client, "/api-keys", payload)
   end
@@ -48,6 +51,7 @@ defmodule Unsent.ApiKeys do
 
       {:ok, _} = Unsent.ApiKeys.delete(client, "key_123")
   """
+  @spec delete(Client.t(), String.t()) :: {:ok, map() | nil} | {:error, any()}
   def delete(client, id) do
     Client.delete(client, "/api-keys/#{id}")
   end

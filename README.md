@@ -34,14 +34,33 @@ client = Unsent.new()
 
 ## Features
 
+- ✅ **Complete API Coverage** - All 60+ API endpoints implemented
+- ✅ **Type Safety** - Full `@spec` annotations using auto-generated types
 - ✅ Send single and batch emails
 - ✅ Manage contacts and contact books
 - ✅ Create and schedule campaigns
-- ✅ Track analytics and reputation
+- ✅ Track analytics, metrics, and stats
+- ✅ Monitor activity feed and events
 - ✅ Manage domains and verification
 - ✅ Handle suppressions and templates
+- ✅ Team and system operations
 - ✅ Built-in error handling
 - ✅ Idempotency support
+
+## Type Safety
+
+The SDK includes complete `@spec` annotations with auto-generated types from the OpenAPI schema:
+
+```elixir
+# Type-safe function signatures
+@spec send(Client.t(), Types.SendEmailRequest.t() | map(), keyword()) :: {:ok, map()} | {:error, any()}
+
+# Benefits:
+# - Better IDE autocomplete
+# - Dialyzer static analysis support
+# - Clear API contracts
+# - Improved documentation
+```
 
 ## API Documentation
 
@@ -348,6 +367,99 @@ Unsent.Analytics.get_reputation(client)
 Unsent.Analytics.get_reputation(client, domain: "yourdomain.com")
 ```
 
+### System
+
+```elixir
+# Health check
+{:ok, health} = Unsent.System.health(client)
+# => %{"status" => "ok", "uptime" => 12345, ...}
+
+# Version information
+{:ok, version} = Unsent.System.version(client)
+# => %{"version" => "1.0.0", "environment" => "production", ...}
+```
+
+### Activity
+
+```elixir
+# Get activity feed
+{:ok, activity} = Unsent.Activity.get(client)
+
+# With pagination
+Unsent.Activity.get(client, page: 2, limit: 20)
+```
+
+### Teams
+
+```elixir
+# Get current team
+{:ok, team} = Unsent.Teams.get(client)
+
+# List all teams
+{:ok, teams} = Unsent.Teams.list(client)
+```
+
+### Events
+
+```elixir
+# List all events
+{:ok, events} = Unsent.Events.list(client)
+
+# With filters
+Unsent.Events.list(client,
+  page: 1,
+  limit: 50,
+  status: "DELIVERED",
+  startDate: "2024-01-01T00:00:00Z"
+)
+```
+
+### Metrics
+
+```elixir
+# Get performance metrics
+{:ok, metrics} = Unsent.Metrics.get(client)
+
+# For specific period
+Unsent.Metrics.get(client, period: "week") # or "day", "month"
+```
+
+### Stats
+
+```elixir
+# Get email statistics
+{:ok, stats} = Unsent.Stats.get(client)
+
+# With date range
+Unsent.Stats.get(client,
+  startDate: "2024-01-01",
+  endDate: "2024-01-31"
+)
+```
+
+### Domain Analytics & Stats
+
+```elixir
+# Get analytics for specific domain
+{:ok, analytics} = Unsent.Domains.get_analytics(client, "domain_id")
+Unsent.Domains.get_analytics(client, "domain_id", period: "week")
+
+# Get stats for specific domain
+{:ok, stats} = Unsent.Domains.get_stats(client, "domain_id")
+Unsent.Domains.get_stats(client, "domain_id", 
+  startDate: "2024-01-01",
+  endDate: "2024-01-31"
+)
+```
+
+### Email Events
+
+```elixir
+# Get events for a specific email
+{:ok, events} = Unsent.Emails.get_events(client, "email_id")
+Unsent.Emails.get_events(client, "email_id", page: 1, limit: 20)
+```
+
 ### Settings
 
 ```elixir
@@ -376,10 +488,27 @@ Unsent.ApiKeys.delete(client, "key_id")
 > **Note**: Webhooks are currently in development and not fully implemented on the server side yet.
 
 ```elixir
-# Placeholder methods available
+# List webhooks
 Unsent.Webhooks.list(client)
-Unsent.Webhooks.create(client, %{url: "https://...", events: [...]})
-Unsent.Webhooks.update(client, "webhook_id", %{events: [...]})
+
+# Create webhook
+Unsent.Webhooks.create(client, %{
+  url: "https://example.com/webhook",
+  events: ["email.sent", "email.delivered", "email.bounced"]
+})
+
+# Get specific webhook
+Unsent.Webhooks.get(client, "webhook_id")
+
+#Update webhook
+Unsent.Webhooks.update(client, "webhook_id", %{
+  events: ["email.sent", "email.delivered"]
+})
+
+# Test webhook
+Unsent.Webhooks.test(client, "webhook_id")
+
+# Delete webhook
 Unsent.Webhooks.delete(client, "webhook_id")
 ```
 
@@ -422,7 +551,7 @@ source .env.local && mix test test/integration_test.exs
 - [Documentation](https://docs.unsent.dev)
 - [API Reference](https://docs.unsent.dev/api-reference)
 - [Dashboard](https://app.unsent.dev)
-- [GitHub](https://github.com/unsentdev/elixir-sdk)
+- [GitHub](https://github.com/souravsspace/elixir-sdk)
 
 ## License
 

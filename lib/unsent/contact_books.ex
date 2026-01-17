@@ -4,6 +4,7 @@ defmodule Unsent.ContactBooks do
   """
 
   alias Unsent.Client
+  alias Unsent.Types
 
   @doc """
   Retrieve all contact books.
@@ -12,6 +13,7 @@ defmodule Unsent.ContactBooks do
 
       {:ok, contact_books} = Unsent.ContactBooks.list(client)
   """
+  @spec list(Client.t()) :: {:ok, list(map())} | {:error, any()}
   def list(client) do
     Client.get(client, "/contactBooks")
   end
@@ -29,6 +31,7 @@ defmodule Unsent.ContactBooks do
         name: "Newsletter Subscribers"
       })
   """
+  @spec create(Client.t(), Types.CreateContactBookRequest.t() | map()) :: {:ok, Types.CreateContactBook200Response.t()} | {:error, any()}
   def create(client, payload) do
     Client.post(client, "/contactBooks", payload)
   end
@@ -40,6 +43,7 @@ defmodule Unsent.ContactBooks do
 
       {:ok, book} = Unsent.ContactBooks.get(client, "book_123")
   """
+  @spec get(Client.t(), String.t()) :: {:ok, Types.GetContactBook200Response.t()} | {:error, any()}
   def get(client, id) do
     Client.get(client, "/contactBooks/#{id}")
   end
@@ -58,6 +62,7 @@ defmodule Unsent.ContactBooks do
         name: "Updated Newsletter Subscribers"
       })
   """
+  @spec update(Client.t(), String.t(), Types.UpdateContactBookRequest.t() | map()) :: {:ok, Types.UpdateContactBook200Response.t()} | {:error, any()}
   def update(client, id, payload) do
     Client.patch(client, "/contactBooks/#{id}", payload)
   end
@@ -67,8 +72,9 @@ defmodule Unsent.ContactBooks do
 
   ## Examples
 
-      {:ok, _} = Unsent.ContactBooks.delete(client, "book_123")
+      {:ok, _} = Unsent.Contact Books.delete(client, "book_123")
   """
+  @spec delete(Client.t(), String.t()) :: {:ok, Types.DeleteContactBook200Response.t()} | {:error, any()}
   def delete(client, id) do
     Client.delete(client, "/contactBooks/#{id}")
   end

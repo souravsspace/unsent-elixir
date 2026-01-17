@@ -4,6 +4,7 @@ defmodule Unsent.Analytics do
   """
 
   alias Unsent.Client
+  alias Unsent.Types
 
   @doc """
   Retrieve email analytics.
@@ -12,6 +13,7 @@ defmodule Unsent.Analytics do
 
       {:ok, analytics} = Unsent.Analytics.get(client)
   """
+  @spec get(Client.t()) :: {:ok, Types.GetAnalytics200Response.t()} | {:error, any()}
   def get(client) do
     Client.get(client, "/analytics")
   end
@@ -30,6 +32,7 @@ defmodule Unsent.Analytics do
       {:ok, data} = Unsent.Analytics.get_time_series(client, days: 30)
       {:ok, data} = Unsent.Analytics.get_time_series(client, days: 7, domain: "example.com")
   """
+  @spec get_time_series(Client.t(), keyword()) :: {:ok, map() | nil} | {:error, any()}
   def get_time_series(client, query \\ []) do
     params = build_query_params(query, [:days, :domain])
     path = build_path("/analytics/time-series", params)
@@ -49,6 +52,7 @@ defmodule Unsent.Analytics do
       {:ok, reputation} = Unsent.Analytics.get_reputation(client)
       {:ok, reputation} = Unsent.Analytics.get_reputation(client, domain: "example.com")
   """
+  @spec get_reputation(Client.t(), keyword()) :: {:ok, map() | nil} | {:error, any()}
   def get_reputation(client, query \\ []) do
     params = build_query_params(query, [:domain])
     path = build_path("/analytics/reputation", params)
